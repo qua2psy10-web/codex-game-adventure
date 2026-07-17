@@ -311,6 +311,11 @@ export default function GameCanvas({ onReturnToTitle }) {
 
     const onKeyDown = (event) => {
       if (!keys.has(event.code)) {
+        if (event.code === 'KeyM') {
+          const nextMusicOn = !getMusicEnabled();
+          setMusicEnabled(nextMusicOn);
+          setMusicOn(nextMusicOn);
+        }
         if (event.code === 'KeyW' || event.code === 'ArrowUp') queuedStep.y -= 0.38;
         if (event.code === 'KeyS' || event.code === 'ArrowDown') queuedStep.y += 0.38;
         if (event.code === 'KeyA' || event.code === 'ArrowLeft') queuedStep.x -= 0.38;
@@ -569,13 +574,14 @@ export default function GameCanvas({ onReturnToTitle }) {
         className="music-button"
         type="button"
         aria-pressed={!musicOn}
+        aria-keyshortcuts="M"
         aria-label={musicOn ? 'BGMを止める' : 'BGMを再生する'}
         onClick={() => {
           const next = !musicOn;
           setMusicEnabled(next);
           setMusicOn(next);
         }}
-      >{musicOn ? '♪ BGM ON' : '♪ BGM OFF'}</button>
+      >{musicOn ? '♪ BGM ON [M]' : '♪ BGM OFF [M]'}</button>
       <header className="hud">
         <div className="hud-hearts" aria-label={`ハート ${hud.hearts}個`}>
           {[0, 1, 2].map((index) => <span key={index} className={index < hud.hearts ? 'heart active' : 'heart'}>♥</span>)}

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 
 const GameCanvas = lazy(() => import('./game/GameCanvas.jsx'));
 
@@ -14,6 +14,18 @@ function readBest() {
 
 function TitleScreen({ onStart }) {
   const best = readBest();
+
+  useEffect(() => {
+    const startWithKeyboard = (event) => {
+      if ((event.code === 'Enter' || event.code === 'Space') && !event.repeat) {
+        event.preventDefault();
+        onStart();
+      }
+    };
+    window.addEventListener('keydown', startWithKeyboard, { passive: false });
+    return () => window.removeEventListener('keydown', startWithKeyboard);
+  }, [onStart]);
+
   return (
     <main className="title-screen">
       <div className="title-vignette" />
@@ -21,9 +33,9 @@ function TitleScreen({ onStart }) {
         <p className="title-cloud">空を駆ける3Dアドベンチャー</p>
         <h1 id="game-title"><span>ソラと</span>浮島の宝石</h1>
         <p className="title-copy">崩れる浮島を飛び越えて、空の神殿へ。</p>
-        <button className="start-button" onClick={onStart}>冒険をはじめる</button>
+        <button className="start-button" onClick={onStart} aria-keyshortcuts="Enter Space">冒険をはじめる</button>
         <div className="title-controls" aria-label="操作方法">
-          <span><b>PC</b> WASD / 矢印キー ＋ Space</span>
+          <span><b>PC</b> Enterで開始・WASD / 矢印キー ＋ Space・MでBGM</span>
           <span><b>スマホ</b> スティック ＋ ジャンプ</span>
         </div>
         {best ? (
