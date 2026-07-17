@@ -4,6 +4,7 @@ import { coins as coinData, feathers as featherData, platforms } from './level.j
 import { sfx, startMusic, stopMusic } from './audio.js';
 
 const BEST_KEY = 'sora-floating-island-best-v1';
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 function makePlatform(def, textures) {
@@ -187,12 +188,12 @@ export default function GameCanvas({ onReturnToTitle }) {
     scene.add(sun);
 
     const loader = new THREE.TextureLoader();
-    const grassTexture = loader.load('/assets/grass-texture.png');
+    const grassTexture = loader.load(assetUrl('/assets/grass-texture.png'));
     grassTexture.colorSpace = THREE.SRGBColorSpace;
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;
     grassTexture.repeat.set(1.6, 1.6);
-    const rockTexture = loader.load('/assets/rock-texture.png');
+    const rockTexture = loader.load(assetUrl('/assets/rock-texture.png'));
     rockTexture.colorSpace = THREE.SRGBColorSpace;
     rockTexture.wrapS = THREE.RepeatWrapping;
     rockTexture.wrapT = THREE.RepeatWrapping;
@@ -204,13 +205,13 @@ export default function GameCanvas({ onReturnToTitle }) {
     [[-22, 12, -24, 2.4], [20, 17, -55, 2.1], [-18, 19, -79, 1.8], [22, 21, -102, 2.5]].forEach((args) => scene.add(makeCloud(...args)));
     const templeDoor = buildTemple(scene);
 
-    const soraTexture = loader.load('/assets/sora.png');
+    const soraTexture = loader.load(assetUrl('/assets/sora.png'));
     soraTexture.colorSpace = THREE.SRGBColorSpace;
     const playerSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: soraTexture, transparent: true, depthWrite: false }));
     playerSprite.scale.set(3.2, 4.8, 1);
     scene.add(playerSprite);
 
-    const enemyTexture = loader.load('/assets/wooden-soldier.png');
+    const enemyTexture = loader.load(assetUrl('/assets/wooden-soldier.png'));
     enemyTexture.colorSpace = THREE.SRGBColorSpace;
     const enemy = new THREE.Sprite(new THREE.SpriteMaterial({ map: enemyTexture, transparent: true, depthWrite: false }));
     enemy.position.set(10, 11.5, -55);
