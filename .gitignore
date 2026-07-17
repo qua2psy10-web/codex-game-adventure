@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.pnpm-store/
+.DS_Store
+*.log
+
+# Image-generation intermediates; final transparent assets are committed.
+public/assets/*-chroma.png
