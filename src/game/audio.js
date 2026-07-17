@@ -1,5 +1,6 @@
 let audioContext;
 let musicTimer;
+let musicEnabled = true;
 
 const notes = [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 392];
 
@@ -19,6 +20,8 @@ function tone(frequency, duration = 0.1, type = 'square', volume = 0.035, delay 
 }
 
 export function startMusic() {
+  stopMusic();
+  if (!musicEnabled) return;
   audioContext ??= new AudioContext();
   audioContext.resume();
   let step = 0;
@@ -32,8 +35,18 @@ export function startMusic() {
 }
 
 export function stopMusic() {
-  window.clearInterval(musicTimer);
+  if (musicTimer !== undefined) window.clearInterval(musicTimer);
   musicTimer = undefined;
+}
+
+export function setMusicEnabled(enabled) {
+  musicEnabled = enabled;
+  if (enabled) startMusic();
+  else stopMusic();
+}
+
+export function getMusicEnabled() {
+  return musicEnabled;
 }
 
 export const sfx = {

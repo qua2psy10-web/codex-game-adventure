@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { coins as coinData, feathers as featherData, platforms } from './level.js';
-import { sfx, startMusic, stopMusic } from './audio.js';
+import { getMusicEnabled, setMusicEnabled, sfx, startMusic, stopMusic } from './audio.js';
 
 const BEST_KEY = 'sora-floating-island-best-v1';
 const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
@@ -159,6 +159,7 @@ export default function GameCanvas({ onReturnToTitle }) {
   const inputRef = useRef({ x: 0, y: 0, jump: false });
   const [hud, setHud] = useState({ hearts: 3, coins: 0, feathers: 0, wind: false, message: 'WASD / 矢印キーで移動', stage: '草原の浮島' });
   const [result, setResult] = useState(null);
+  const [musicOn, setMusicOn] = useState(getMusicEnabled);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -267,6 +268,10 @@ export default function GameCanvas({ onReturnToTitle }) {
       startTime: performance.now(),
       secretOpen: false,
     };
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('debugSpawn') === 'enemy') {
+      player.position.set(7.4, 8.62, -55);
+      player.checkpoint.copy(player.position);
+    }
     const keys = new Set();
     const queuedStep = new THREE.Vector2();
     let jumpQueued = false;
@@ -319,6 +324,11 @@ export default function GameCanvas({ onReturnToTitle }) {
     window.addEventListener('keydown', onKeyDown, { passive: false });
     window.addEventListener('keyup', onKeyUp);
     startMusic();
+    const onVisibilityChange = () => {
+      if (document.hidden) stopMusic();
+      else if (!player.complete) startMusic();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     const resize = () => {
       const width = mount.clientWidth;
@@ -491,7 +501,7 @@ export default function GameCanvas({ onReturnToTitle }) {
         }
       } else if (enemy.visible) {
         const progress = (now - destroyedEnemyAt) / 650;
-        enemy.rotation += delta * 7;
+        enemy.material.rotation += delta * 7;
         enemy.scale.multiplyScalar(0.94);
         enemy.position.y -= delta * 2;
         if (progress > 1) enemy.visible = false;
@@ -540,6 +550,7 @@ export default function GameCanvas({ onReturnToTitle }) {
       observer.disconnect();
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       renderer.dispose();
       scene.traverse((object) => {
         object.geometry?.dispose();
@@ -554,6 +565,17 @@ export default function GameCanvas({ onReturnToTitle }) {
     <main className={`game-shell ${hud.wind ? 'is-windy' : ''}`}>
       <div ref={mountRef} className="game-canvas" aria-label="ソラと浮島の宝石 3Dゲーム画面" />
       <div className="weather-layer" />
+      <button
+        className="music-button"
+        type="button"
+        aria-pressed={!musicOn}
+        aria-label={musicOn ? 'BGMを止める' : 'BGMを再生する'}
+        onClick={() => {
+          const next = !musicOn;
+          setMusicEnabled(next);
+          setMusicOn(next);
+        }}
+      >{musicOn ? '♪ BGM ON' : '♪ BGM OFF'}</button>
       <header className="hud">
         <div className="hud-hearts" aria-label={`ハート ${hud.hearts}個`}>
           {[0, 1, 2].map((index) => <span key={index} className={index < hud.hearts ? 'heart active' : 'heart'}>♥</span>)}
