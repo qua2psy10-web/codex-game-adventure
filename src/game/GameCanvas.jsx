@@ -510,11 +510,10 @@ export default function GameCanvas({ onReturnToTitle }) {
       if (now < player.attackUntil) playerSprite.scale.x = 3.55;
       else playerSprite.scale.x = 3.2;
 
-      const cameraSide = player.position.z < -25 ? 8 : 6.5;
-      const desiredCamera = new THREE.Vector3(player.position.x + cameraSide, player.position.y + 7.2, player.position.z + 13);
+      const desiredCamera = new THREE.Vector3(player.position.x, player.position.y + 6.4, player.position.z + 12.5);
       if (gusting) desiredCamera.x += Math.sin(now * 0.025) * 0.16;
       camera.position.lerp(desiredCamera, 1 - Math.exp(-delta * 3.4));
-      const lookAt = new THREE.Vector3(player.position.x, player.position.y + 2.1, player.position.z - 5);
+      const lookAt = new THREE.Vector3(player.position.x, player.position.y + 2, player.position.z - 6.5);
       camera.lookAt(lookAt);
 
       let message = '';
