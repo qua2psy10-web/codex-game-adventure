@@ -35,7 +35,8 @@ function TitleScreen({ onStart }) {
         <p className="title-copy">崩れる浮島を飛び越えて、空の神殿へ。</p>
         <button className="start-button" onClick={onStart} aria-keyshortcuts="Enter Space">冒険をはじめる</button>
         <div className="title-controls" aria-label="操作方法">
-          <span><b>PC</b> Enterで開始・WASD / 矢印キー ＋ Space・MでBGM</span>
+          <span><b>PC</b> Enter 開始・WASD / 矢印キー・Space ジャンプ・M BGM</span>
+          <span><b>PC</b> J 攻撃・Q/E カメラ・C リセット</span>
           <span><b>スマホ</b> スティック ＋ ジャンプ</span>
         </div>
         {best ? (

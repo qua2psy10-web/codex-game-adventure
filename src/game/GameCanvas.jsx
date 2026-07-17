@@ -275,6 +275,8 @@ export default function GameCanvas({ onReturnToTitle }) {
     const keys = new Set();
     const queuedStep = new THREE.Vector2();
     let jumpQueued = false;
+    let attackQueued = false;
+    let cameraYaw = 0;
     let previousPosition = player.position.clone();
     let raf = 0;
     let lastHudUpdate = 0;
@@ -316,6 +318,10 @@ export default function GameCanvas({ onReturnToTitle }) {
           setMusicEnabled(nextMusicOn);
           setMusicOn(nextMusicOn);
         }
+        if (event.code === 'KeyJ') attackQueued = true;
+        if (event.code === 'KeyQ') cameraYaw -= 0.14;
+        if (event.code === 'KeyE') cameraYaw += 0.14;
+        if (event.code === 'KeyC') cameraYaw = 0;
         if (event.code === 'KeyW' || event.code === 'ArrowUp') queuedStep.y -= 0.38;
         if (event.code === 'KeyS' || event.code === 'ArrowDown') queuedStep.y += 0.38;
         if (event.code === 'KeyA' || event.code === 'ArrowLeft') queuedStep.x -= 0.38;
@@ -410,14 +416,27 @@ export default function GameCanvas({ onReturnToTitle }) {
       let inputZ = (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) + mobile.y;
       const inputLength = Math.hypot(inputX, inputZ);
       if (inputLength > 1) { inputX /= inputLength; inputZ /= inputLength; }
+      const cameraTurn = (keys.has('KeyE') ? 1 : 0) - (keys.has('KeyQ') ? 1 : 0);
+      cameraYaw += cameraTurn * delta * 1.8;
+      cameraYaw = THREE.MathUtils.euclideanModulo(cameraYaw + Math.PI, Math.PI * 2) - Math.PI;
+      const cameraCos = Math.cos(cameraYaw);
+      const cameraSin = Math.sin(cameraYaw);
+      const worldInputX = inputX * cameraCos + inputZ * cameraSin;
+      const worldInputZ = -inputX * cameraSin + inputZ * cameraCos;
       const targetSpeed = player.complete ? 0 : 7.7;
-      player.velocity.x = THREE.MathUtils.damp(player.velocity.x, inputX * targetSpeed, 10, delta);
-      player.velocity.z = THREE.MathUtils.damp(player.velocity.z, inputZ * targetSpeed, 10, delta);
+      player.velocity.x = THREE.MathUtils.damp(player.velocity.x, worldInputX * targetSpeed, 10, delta);
+      player.velocity.z = THREE.MathUtils.damp(player.velocity.z, worldInputZ * targetSpeed, 10, delta);
       if (!player.complete) {
-        player.position.x += queuedStep.x;
-        player.position.z += queuedStep.y;
+        player.position.x += queuedStep.x * cameraCos + queuedStep.y * cameraSin;
+        player.position.z += -queuedStep.x * cameraSin + queuedStep.y * cameraCos;
       }
       queuedStep.set(0, 0);
+
+      if (attackQueued && !player.complete && now > player.attackUntil) {
+        player.attackUntil = now + 420;
+        sfx.sword();
+      }
+      attackQueued = false;
 
       const jumpPressed = keys.has('Space') || inputRef.current.jump || jumpQueued;
       if (jumpPressed && !player.jumpHeld && player.onGround && !player.complete) {
@@ -494,11 +513,11 @@ export default function GameCanvas({ onReturnToTitle }) {
           enemy.position.x += (dx / Math.max(distance, 0.1)) * delta * 2.1;
           enemy.position.z += (dz / Math.max(distance, 0.1)) * delta * 2.1;
         }
-        if (distance < 3.1 && now > player.attackUntil) {
+        if (isTouch && distance < 3.1 && now > player.attackUntil) {
           player.attackUntil = now + 750;
           sfx.sword();
-          player.position.x += (enemy.position.x - player.position.x) * 0.28;
-          player.position.z += (enemy.position.z - player.position.z) * 0.28;
+        }
+        if (distance < 3.25 && now < player.attackUntil) {
           enemy.userData.alive = false;
           destroyedEnemyAt = now;
         } else if (distance < 1.15 && now > player.invulnerableUntil) {
@@ -525,16 +544,25 @@ export default function GameCanvas({ onReturnToTitle }) {
       if (now < player.attackUntil) playerSprite.scale.x = 3.55;
       else playerSprite.scale.x = 3.2;
 
-      const desiredCamera = new THREE.Vector3(player.position.x, player.position.y + 6.4, player.position.z + 12.5);
+      const desiredCamera = new THREE.Vector3(
+        player.position.x + cameraSin * 12.5,
+        player.position.y + 6.4,
+        player.position.z + cameraCos * 12.5,
+      );
       if (gusting) desiredCamera.x += Math.sin(now * 0.025) * 0.16;
       camera.position.lerp(desiredCamera, 1 - Math.exp(-delta * 3.4));
-      const lookAt = new THREE.Vector3(player.position.x, player.position.y + 2, player.position.z - 6.5);
+      const lookAt = new THREE.Vector3(
+        player.position.x - cameraSin * 6.5,
+        player.position.y + 2,
+        player.position.z - cameraCos * 6.5,
+      );
       camera.lookAt(lookAt);
 
       let message = '';
-      if (player.position.z > -6) message = isTouch ? 'スティックで移動' : 'WASD / 矢印キーで移動';
+      if (player.position.z > -6) message = isTouch ? 'スティックで移動' : '移動: WASD / 矢印　攻撃: J　カメラ: Q / E';
       else if (player.position.z > -18) message = isTouch ? 'JUMP でジャンプ' : 'SPACE でジャンプ';
       else if (player.position.z > -28) message = '動く浮島へ飛び移ろう';
+      else if (enemy.userData.alive && player.position.z < -49 && player.position.z > -60 && player.position.x > 4) message = isTouch ? '木の兵士に近づこう' : 'Jで木の兵士を攻撃！';
       else if (player.position.z > -57) message = '滝の上を目指そう';
       else if (gusting) message = '強風！ 足場の中央へ';
       else if (inWind && gustPhase > 2.7) message = '草が揺れている…風が来る！';
@@ -582,6 +610,9 @@ export default function GameCanvas({ onReturnToTitle }) {
           setMusicOn(next);
         }}
       >{musicOn ? '♪ BGM ON [M]' : '♪ BGM OFF [M]'}</button>
+      <div className="keyboard-help" aria-label="PC操作">
+        <span><b>J</b> 攻撃</span><span><b>Q E</b> カメラ</span><span><b>C</b> 真後ろへ戻す</span>
+      </div>
       <header className="hud">
         <div className="hud-hearts" aria-label={`ハート ${hud.hearts}個`}>
           {[0, 1, 2].map((index) => <span key={index} className={index < hud.hearts ? 'heart active' : 'heart'}>♥</span>)}
