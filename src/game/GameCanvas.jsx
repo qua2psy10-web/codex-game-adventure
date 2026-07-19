@@ -275,7 +275,6 @@ export default function GameCanvas({ onReturnToTitle }) {
     const keys = new Set();
     const queuedStep = new THREE.Vector2();
     let jumpQueued = false;
-    let attackQueued = false;
     let cameraYaw = 0;
     let previousPosition = player.position.clone();
     let raf = 0;
@@ -318,7 +317,6 @@ export default function GameCanvas({ onReturnToTitle }) {
           setMusicEnabled(nextMusicOn);
           setMusicOn(nextMusicOn);
         }
-        if (event.code === 'KeyJ') attackQueued = true;
         if (event.code === 'KeyQ') cameraYaw -= 0.14;
         if (event.code === 'KeyE') cameraYaw += 0.14;
         if (event.code === 'KeyC') cameraYaw = 0;
@@ -432,12 +430,6 @@ export default function GameCanvas({ onReturnToTitle }) {
       }
       queuedStep.set(0, 0);
 
-      if (attackQueued && !player.complete && now > player.attackUntil) {
-        player.attackUntil = now + 420;
-        sfx.sword();
-      }
-      attackQueued = false;
-
       const jumpPressed = keys.has('Space') || inputRef.current.jump || jumpQueued;
       if (jumpPressed && !player.jumpHeld && player.onGround && !player.complete) {
         player.velocity.y = 9.2;
@@ -513,7 +505,7 @@ export default function GameCanvas({ onReturnToTitle }) {
           enemy.position.x += (dx / Math.max(distance, 0.1)) * delta * 2.1;
           enemy.position.z += (dz / Math.max(distance, 0.1)) * delta * 2.1;
         }
-        if (isTouch && distance < 3.1 && now > player.attackUntil) {
+        if (distance < 3.1 && now > player.attackUntil) {
           player.attackUntil = now + 750;
           sfx.sword();
         }
@@ -559,10 +551,10 @@ export default function GameCanvas({ onReturnToTitle }) {
       camera.lookAt(lookAt);
 
       let message = '';
-      if (player.position.z > -6) message = isTouch ? 'スティックで移動' : '移動: WASD / 矢印　攻撃: J　カメラ: Q / E';
+      if (player.position.z > -6) message = isTouch ? 'スティックで移動' : '移動: WASD / 矢印　攻撃: 自動　カメラ: Q / E';
       else if (player.position.z > -18) message = isTouch ? 'JUMP でジャンプ' : 'SPACE でジャンプ';
       else if (player.position.z > -28) message = '動く浮島へ飛び移ろう';
-      else if (enemy.userData.alive && player.position.z < -49 && player.position.z > -60 && player.position.x > 4) message = isTouch ? '木の兵士に近づこう' : 'Jで木の兵士を攻撃！';
+      else if (enemy.userData.alive && player.position.z < -49 && player.position.z > -60 && player.position.x > 4) message = '木の兵士に近づくと自動攻撃！';
       else if (player.position.z > -57) message = '滝の上を目指そう';
       else if (gusting) message = '強風！ 足場の中央へ';
       else if (inWind && gustPhase > 2.7) message = '草が揺れている…風が来る！';
@@ -611,7 +603,7 @@ export default function GameCanvas({ onReturnToTitle }) {
         }}
       >{musicOn ? '♪ BGM ON [M]' : '♪ BGM OFF [M]'}</button>
       <div className="keyboard-help" aria-label="PC操作">
-        <span><b>J</b> 攻撃</span><span><b>Q E</b> カメラ</span><span><b>C</b> 真後ろへ戻す</span>
+        <span>攻撃 <b>AUTO</b></span><span><b>Q E</b> カメラ</span><span><b>C</b> 真後ろへ戻す</span>
       </div>
       <header className="hud">
         <div className="hud-hearts" aria-label={`ハート ${hud.hearts}個`}>
