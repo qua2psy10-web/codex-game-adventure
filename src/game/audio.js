@@ -34,6 +34,23 @@ export function startMusic() {
   musicTimer = window.setInterval(playStep, 230);
 }
 
+export function startTitanMusic() {
+  stopMusic();
+  if (!musicEnabled) return;
+  audioContext ??= new AudioContext();
+  audioContext.resume();
+  let step = 0;
+  const bass = [82.41, 82.41, 98, 73.42, 82.41, 110, 98, 73.42];
+  const playStep = () => {
+    tone(bass[step % bass.length], 0.25, 'sawtooth', 0.025);
+    if (step % 2 === 0) tone(bass[(step + 2) % bass.length] * 2, 0.12, 'square', 0.014);
+    if (step % 4 === 3) tone(55, 0.35, 'triangle', 0.035);
+    step += 1;
+  };
+  playStep();
+  musicTimer = window.setInterval(playStep, 285);
+}
+
 export function stopMusic() {
   if (musicTimer !== undefined) window.clearInterval(musicTimer);
   musicTimer = undefined;

@@ -155,6 +155,46 @@ button { font: inherit; }
 .returning { margin: 13px 0 0; font-size: 12px; opacity: .8; }
 @keyframes reveal { from { opacity: 0; transform: scale(1.06); } }
 
+.stage-select-screen {
+  width: 100%; height: 100%; padding: clamp(18px, 4vh, 42px) clamp(18px, 4vw, 58px);
+  display: grid; grid-template-rows: auto 1fr auto; gap: 24px;
+  background: linear-gradient(rgba(8,18,55,.18), rgba(8,16,48,.74)), url('/assets/stage2/twilight-bg.png') center/cover;
+}
+.stage-select-heading { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; text-shadow: 0 4px 16px #061233; }
+.stage-select-heading h1 { margin: 0; font-size: clamp(28px, 4vw, 52px); letter-spacing: .08em; }
+.stage-select-heading button { justify-self: start; padding: 10px 15px; border: 2px solid rgba(255,255,255,.65); border-radius: 10px; color: #fff; background: rgba(8,25,63,.75); font-weight: 900; cursor: pointer; }
+.stage-card-row { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2.2vw, 30px); min-height: 0; }
+.stage-card { position: relative; isolation: isolate; width: min(30%, 410px); aspect-ratio: .83; padding: 25px 20px 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; border: 3px solid rgba(235,244,255,.78); border-radius: 22px; color: white; background: #102a58 center/cover no-repeat; box-shadow: 0 15px 35px rgba(1,8,32,.42); text-align: left; cursor: pointer; transition: transform .18s, border-color .18s, filter .18s; }
+.stage-card::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 28%, rgba(4,13,37,.96) 82%); }
+.stage-card.selected { transform: translateY(-8px) scale(1.035); border-color: #ffd95a; box-shadow: 0 0 0 3px rgba(255,217,90,.22), 0 0 35px rgba(255,181,52,.65), 0 20px 42px rgba(1,8,32,.5); }
+.stage-card.locked { filter: saturate(.35) brightness(.58); }
+.stage-card:focus-visible { outline: 4px solid #59efff; outline-offset: 5px; }
+.stage-number { color: #ffd95a; font-size: 12px; font-weight: 950; letter-spacing: .2em; }
+.stage-card strong { margin: 6px 0 14px; font-size: clamp(20px, 2.2vw, 31px); text-shadow: 0 3px 10px #050b24; }
+.stage-record { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 7px; }
+.stage-record span { padding: 8px 6px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: rgba(5,21,51,.7); text-align: center; }
+.stage-record small { display: block; color: #a8ddff; font-size: 8px; }
+.stage-record b { font-size: 12px; }.stage-record.empty { padding: 12px; border-radius: 9px; background: rgba(5,21,51,.7); text-align: center; font-size: 12px; }
+.stage-lock { display: grid; place-items: center; min-height: 54px; border-radius: 9px; background: rgba(2,8,25,.76); font-size: 11px; }.stage-lock b { color: #ffd95a; font-size: 19px; }
+.stage-select-help { display: flex; justify-content: center; gap: 28px; font-size: 12px; text-shadow: 0 2px 7px #061233; }.stage-select-help b { color: #ffe370; }
+
+.stage2-shell { background: #442257 url('/assets/stage2/twilight-bg.png') center/cover no-repeat; }
+.stage2-tint { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(245,138,88,.13), transparent 50%, rgba(7,27,86,.18)); pointer-events: none; }
+.stage2-shell .hud-stage { background: linear-gradient(90deg, transparent, rgba(38,19,62,.76), transparent); }
+.stage2-shell .hud-stage span { color: #ffd979; }.stage2-shell .keyboard-help span, .stage2-shell .game-message, .stage2-shell .music-button { background: rgba(29,16,60,.78); }
+.is-boulder-warning .game-canvas { animation: boulder-shake .12s linear infinite; }
+@keyframes boulder-shake { 25% { transform: translate(3px,-2px); } 50% { transform: translate(-2px,2px); } 75% { transform: translate(2px,1px); } }
+.boulder-warning { position: absolute; z-index: 7; top: 110px; left: 50%; transform: translateX(-50%); padding: 10px 25px; border: 2px solid #fff2a0; border-radius: 999px; color: #361206; background: #ffbd3e; box-shadow: 0 0 25px #ff713d; font-size: 18px; font-weight: 950; animation: warning-pulse .45s ease-in-out infinite alternate; }
+@keyframes warning-pulse { to { transform: translateX(-50%) scale(1.06); filter: brightness(1.22); } }
+.boss-hud { position: absolute; z-index: 6; top: 76px; left: 50%; transform: translateX(-50%); width: min(440px,60vw); text-align: center; text-shadow: 0 2px 5px #1a0a24; }
+.boss-hud span { display: block; margin-bottom: 7px; color: #fff3cf; font-size: 13px; font-weight: 950; letter-spacing: .15em; }
+.boss-hud div { display: flex; gap: 6px; padding: 5px; border: 2px solid #d9a62e; border-radius: 9px; background: rgba(26,11,43,.78); }
+.boss-hud i { flex: 1; height: 13px; border-radius: 4px; background: rgba(255,255,255,.16); }.boss-hud i.alive { background: linear-gradient(90deg,#ffad38,#ffe578); box-shadow: 0 0 10px #ff9b33; }
+.boss-hud b { display: inline-block; margin-top: 6px; padding: 4px 12px; border-radius: 999px; color: #2e1336; background: #ffe66d; font-size: 11px; animation: warning-pulse .45s alternate infinite; }
+.stage2-result { background: radial-gradient(circle at 50% 40%, rgba(255,212,80,.45), rgba(45,20,74,.93) 70%), url('/assets/stage2/twilight-bg.png') center/cover; }
+.stage2-result h2 { text-shadow: 0 5px 0 #713649; }.sunset-gem { margin: -18px 0 6px; color: #ffd253; font-size: 70px; filter: drop-shadow(0 0 20px #ff9b49); }.stage2-result .result-stats span { background: rgba(36,18,69,.72); border-color: #dfbd60; }
+.result-button { justify-self: center; min-width: 210px; padding: 13px 25px; border: 3px solid white; border-radius: 999px; color: #4c2858; background: linear-gradient(#fff38a,#e9b33a); box-shadow: 0 6px 0 #87502d; font-weight: 950; cursor: pointer; }
+
 @media (pointer: coarse), (max-width: 760px) {
   .keyboard-help { display: none; }
   .mobile-controls { display: flex; }
@@ -166,6 +206,9 @@ button { font: inherit; }
   .title-controls { display: none; }
   .title-copy { margin-block: 12px 14px; }
   .result-stats span { min-width: 110px; }
+  .stage-select-screen { padding: 14px; gap: 10px; }
+  .stage-card-row { justify-content: flex-start; overflow-x: auto; padding: 10px 5vw 18px; scroll-snap-type: x mandatory; }
+  .stage-card { flex: 0 0 72vw; max-height: 65vh; scroll-snap-align: center; }
 }
 
 @media (max-width: 700px) and (orientation: portrait) {
