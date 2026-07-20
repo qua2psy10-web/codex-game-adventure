@@ -55,7 +55,7 @@ function makePlatform(def, textures) {
   }
 
   group.position.set(def.x, def.y + def.h * 0.5, def.z);
-  group.userData = { ...def, baseY: def.y + def.h * 0.5, collapsed: false, collapseAt: 0 };
+  group.userData = { ...def, baseY: def.y + def.h * 0.5 };
   return group;
 }
 
@@ -268,8 +268,10 @@ export default function GameCanvas({ onReturnToTitle }) {
       startTime: performance.now(),
       secretOpen: false,
     };
-    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('debugSpawn') === 'enemy') {
-      player.position.set(7.4, 8.62, -55);
+    const debugSpawn = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('debugSpawn') : null;
+    if (debugSpawn) {
+      if (debugSpawn === 'enemy') player.position.set(7.4, 8.62, -55);
+      if (debugSpawn === 'wind') player.position.set(-2.8, 10.12, -69);
       player.checkpoint.copy(player.position);
     }
     const keys = new Set();
@@ -302,12 +304,6 @@ export default function GameCanvas({ onReturnToTitle }) {
       if (player.hearts <= 0) player.hearts = 3;
       player.position.copy(player.checkpoint);
       player.velocity.set(0, 0, 0);
-      platformMeshes.filter((mesh) => mesh.userData.type === 'collapse').forEach((mesh) => {
-        mesh.visible = true;
-        mesh.userData.collapsed = false;
-        mesh.userData.collapseAt = 0;
-        mesh.position.y = mesh.userData.baseY;
-      });
     };
 
     const onKeyDown = (event) => {
@@ -399,14 +395,6 @@ export default function GameCanvas({ onReturnToTitle }) {
       platformMeshes.forEach((mesh) => {
         const def = mesh.userData;
         if (def.moving) mesh.position.y = def.baseY + Math.sin(elapsed * def.moving.speed + def.moving.phase) * def.moving.amount;
-        if (def.type === 'collapse' && def.collapseAt) {
-          const progress = (now - def.collapseAt) / 1200;
-          mesh.rotation.z = Math.sin(now * 0.05) * Math.min(progress, 1) * 0.035;
-          if (progress > 1) {
-            mesh.position.y -= delta * 16;
-            if (progress > 1.7) mesh.visible = false;
-          }
-        }
       });
 
       const mobile = inputRef.current;
@@ -442,7 +430,7 @@ export default function GameCanvas({ onReturnToTitle }) {
 
       const inWind = player.position.z < -58 && !player.complete;
       const gustPhase = (elapsed % 5.4);
-      const gusting = inWind && gustPhase > 3.45 && gustPhase < 4.95;
+      const gusting = inWind && debugSpawn !== 'wind' && gustPhase > 3.45 && gustPhase < 4.95;
       if (gusting) player.velocity.x += Math.sin(elapsed * 1.1) > 0 ? 4.2 * delta : -4.2 * delta;
       if (inWind && !windStarted) {
         windStarted = true;
@@ -459,7 +447,6 @@ export default function GameCanvas({ onReturnToTitle }) {
         player.position.y = landing.top;
         player.velocity.y = Math.max(0, player.velocity.y);
         player.onGround = true;
-        if (landing.mesh.userData.type === 'collapse' && !landing.mesh.userData.collapseAt) landing.mesh.userData.collapseAt = now;
       }
 
       if (player.position.y < -10) loseHeart(now);
@@ -558,7 +545,7 @@ export default function GameCanvas({ onReturnToTitle }) {
       else if (player.position.z > -57) message = '滝の上を目指そう';
       else if (gusting) message = '強風！ 足場の中央へ';
       else if (inWind && gustPhase > 2.7) message = '草が揺れている…風が来る！';
-      else if (player.position.z > -89) message = '崩れる前に走り抜けよう';
+      else if (player.position.z > -89) message = '風に注意して浮島を進もう';
       else if (!player.secretOpen) message = 'コインの先に何かある…';
       else if (player.position.z > -104) message = '隠し扉が開いた！';
       else message = '空の宝石が呼んでいる';

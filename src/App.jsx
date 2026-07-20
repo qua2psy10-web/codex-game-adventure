@@ -32,7 +32,7 @@ function TitleScreen({ onStart }) {
       <section className="title-panel" aria-labelledby="game-title">
         <p className="title-cloud">空を駆ける3Dアドベンチャー</p>
         <h1 id="game-title"><span>ソラと</span>浮島の宝石</h1>
-        <p className="title-copy">崩れる浮島を飛び越えて、空の神殿へ。</p>
+        <p className="title-copy">風の浮島を飛び越えて、空の神殿へ。</p>
         <button className="start-button" onClick={onStart} aria-keyshortcuts="Enter Space">冒険をはじめる</button>
         <div className="title-controls" aria-label="操作方法">
           <span><b>PC</b> Enter 開始・WASD / 矢印キー・Space ジャンプ・M BGM</span>
