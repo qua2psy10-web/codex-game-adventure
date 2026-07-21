@@ -2,11 +2,14 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react
 
 const Stage1Canvas = lazy(() => import('./game/GameCanvas.jsx'));
 const Stage2Canvas = lazy(() => import('./game/Stage2Canvas.jsx'));
+const Stage3Canvas = lazy(() => import('./game/Stage3Canvas.jsx'));
 
 const STAGE1_BEST_KEY = 'sora-floating-island-best-v1';
 const STAGE2_BEST_KEY = 'sora-twilight-ruins-best-v1';
 const STAGE2_UNLOCK_KEY = 'sora-stage2-unlocked-v1';
 const STAGE3_UNLOCK_KEY = 'sora-stage3-unlocked-v1';
+const STAGE3_BEST_KEY = 'sora-storm-castle-best-v1';
+const AIR_DASH_KEY = 'sora-air-dash-unlocked-v1';
 const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
 
 function readJson(key) {
@@ -33,7 +36,7 @@ function TitleScreen({ onStart }) {
       <section className="title-panel" aria-labelledby="game-title">
         <p className="title-cloud">空を駆ける3Dアドベンチャー</p>
         <h1 id="game-title"><span>ソラと</span>浮島の宝石</h1>
-        <p className="title-copy">二つの空を巡り、失われた宝石を解放しよう。</p>
+        <p className="title-copy">三つの空を巡り、精霊たちの光を解放しよう。</p>
         <button className="start-button" onClick={onStart} aria-keyshortcuts="Enter Space">
           {best ? 'ステージを選ぶ' : '冒険をはじめる'}
         </button>
@@ -49,13 +52,14 @@ function TitleScreen({ onStart }) {
   );
 }
 
-function StageRecord({ record }) {
+function StageRecord({ record, item = 'FEATHER', max = 3, extra = null }) {
   if (!record) return <div className="stage-record empty">まだ記録がありません</div>;
   return (
     <div className="stage-record">
       <span><small>BEST</small><b>{record.time ?? '--'}秒</b></span>
       <span><small>COIN</small><b>{record.coins ?? 0}</b></span>
-      <span><small>FEATHER</small><b>{record.feathers ?? 0}/3</b></span>
+      <span><small>{item}</small><b>{record.crystals ?? record.feathers ?? 0}/{max}</b></span>
+      {extra ? <span className="stage-record-extra"><small>{extra.label}</small><b>{extra.value}</b></span> : null}
     </div>
   );
 }
@@ -63,15 +67,17 @@ function StageRecord({ record }) {
 function StageSelect({ onChoose, onTitle }) {
   const [stage1] = useState(() => readJson(STAGE1_BEST_KEY));
   const [stage2] = useState(() => readJson(STAGE2_BEST_KEY));
+  const [stage3] = useState(() => readJson(STAGE3_BEST_KEY));
   const debugUnlocked = import.meta.env.DEV && new URLSearchParams(location.search).get('debugStage') === 'select';
   const stage2Unlocked = Boolean(stage1 || stage2 || readJson(STAGE2_UNLOCK_KEY) || debugUnlocked);
-  const stage3Unlocked = Boolean(readJson(STAGE3_UNLOCK_KEY));
+  const stage3Unlocked = Boolean(stage3 || readJson(STAGE3_UNLOCK_KEY) || debugUnlocked);
+  const airDashUnlocked = Boolean(readJson(AIR_DASH_KEY));
   const stages = useMemo(() => [
     { id: 1, label: '草原の浮島', image: assetUrl('concept/gameplay-concept.png'), record: stage1, unlocked: true },
     { id: 2, label: '夕焼けの古代遺跡', image: assetUrl('concept/stage2/gameplay.png'), record: stage2, unlocked: stage2Unlocked },
-    { id: 3, label: '準備中', image: assetUrl('concept/stage2/titan-battle.png'), record: null, unlocked: false, revealed: stage3Unlocked },
-  ], [stage1, stage2, stage2Unlocked, stage3Unlocked]);
-  const [selected, setSelected] = useState(stage2Unlocked ? 1 : 0);
+    { id: 3, label: '嵐を抱く天空城', image: assetUrl('concept/stage3/gameplay.png'), record: stage3, unlocked: stage3Unlocked, item: 'CRYSTAL', max: 5, powered: airDashUnlocked },
+  ], [stage1, stage2, stage2Unlocked, stage3, stage3Unlocked, airDashUnlocked]);
+  const [selected, setSelected] = useState(stage3Unlocked ? 2 : stage2Unlocked ? 1 : 0);
 
   useEffect(() => {
     const navigate = (event) => {
@@ -101,7 +107,7 @@ function StageSelect({ onChoose, onTitle }) {
         {stages.map((stage, index) => (
           <button
             key={stage.id}
-            className={`stage-card ${selected === index ? 'selected' : ''} ${stage.unlocked ? '' : 'locked'}`}
+            className={`stage-card ${selected === index ? 'selected' : ''} ${stage.unlocked ? '' : 'locked'} ${stage.powered ? 'power-unlocked' : ''}`}
             style={{ backgroundImage: `url(${stage.image})` }}
             onMouseEnter={() => setSelected(index)}
             onClick={() => stage.unlocked ? onChoose(stage.id) : setSelected(index)}
@@ -109,7 +115,7 @@ function StageSelect({ onChoose, onTitle }) {
           >
             <span className="stage-number">STAGE {stage.id}</span>
             <strong>{stage.label}</strong>
-            {stage.unlocked ? <StageRecord record={stage.record} /> : (
+            {stage.unlocked ? <StageRecord record={stage.record} item={stage.item} max={stage.max} extra={stage.id === 3 && stage.record ? { label: 'SPIRIT / FALL', value: `${stage.record.spirits ?? 0}/3 ・ ${stage.record.falls ?? '--'}` } : null} /> : (
               <span className="stage-lock"><b>{stage.revealed ? 'NEXT' : '🔒'}</b>{stage.revealed ? '新たな道が開いた' : '第1ステージをクリア'}</span>
             )}
           </button>
@@ -126,17 +132,21 @@ function LoadingScreen() {
 
 export default function App() {
   const debugScreen = import.meta.env.DEV ? new URLSearchParams(location.search).get('debugStage') : null;
-  const [screen, setScreen] = useState(debugScreen === '2' ? 'stage2' : debugScreen === 'select' ? 'select' : 'title');
+  const [screen, setScreen] = useState(debugScreen === '3' ? 'stage3' : debugScreen === '2' ? 'stage2' : debugScreen === 'select' ? 'select' : 'title');
   const start = useCallback(() => setScreen(readJson(STAGE1_BEST_KEY) ? 'select' : 'stage1'), []);
   const toTitle = useCallback(() => setScreen('title'), []);
   const toSelect = useCallback(() => setScreen('select'), []);
-  const chooseStage = useCallback((stage) => setScreen(stage === 1 ? 'stage1' : 'stage2'), []);
+  const chooseStage = useCallback((stage) => setScreen(stage === 1 ? 'stage1' : stage === 2 ? 'stage2' : 'stage3'), []);
   const finishStage1 = useCallback(() => {
     localStorage.setItem(STAGE2_UNLOCK_KEY, JSON.stringify(true));
     setScreen('select');
   }, []);
   const finishStage2 = useCallback(() => {
     localStorage.setItem(STAGE3_UNLOCK_KEY, JSON.stringify(true));
+    setScreen('select');
+  }, []);
+  const finishStage3 = useCallback(() => {
+    localStorage.setItem(AIR_DASH_KEY, JSON.stringify(true));
     setScreen('select');
   }, []);
 
@@ -147,6 +157,7 @@ export default function App() {
     <Suspense fallback={<LoadingScreen />}>
       {screen === 'stage1' ? <Stage1Canvas onReturnToTitle={finishStage1} /> : null}
       {screen === 'stage2' ? <Stage2Canvas onComplete={finishStage2} onExit={toSelect} /> : null}
+      {screen === 'stage3' ? <Stage3Canvas onComplete={finishStage3} onExit={toSelect} /> : null}
     </Suspense>
   );
 }

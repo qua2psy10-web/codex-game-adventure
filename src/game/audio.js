@@ -51,6 +51,39 @@ export function startTitanMusic() {
   musicTimer = window.setInterval(playStep, 285);
 }
 
+export function startStormMusic() {
+  stopMusic();
+  if (!musicEnabled) return;
+  audioContext ??= new AudioContext();
+  audioContext.resume();
+  let step = 0;
+  const choir = [220, 277.18, 329.63, 415.3, 329.63, 277.18, 246.94, 329.63];
+  const playStep = () => {
+    tone(choir[step % choir.length], .34, 'sine', .016);
+    if (step % 2 === 0) tone(choir[(step + 2) % choir.length] / 2, .42, 'triangle', .015);
+    step += 1;
+  };
+  playStep();
+  musicTimer = window.setInterval(playStep, 390);
+}
+
+export function startNoxMusic() {
+  stopMusic();
+  if (!musicEnabled) return;
+  audioContext ??= new AudioContext();
+  audioContext.resume();
+  let step = 0;
+  const solemn = [110, 130.81, 146.83, 164.81, 146.83, 123.47, 98, 110];
+  const playStep = () => {
+    tone(solemn[step % solemn.length], .3, 'sawtooth', .018);
+    tone(solemn[(step + 3) % solemn.length] * 2, .5, 'sine', .012);
+    if (step % 4 === 0) tone(55, .55, 'triangle', .035);
+    step += 1;
+  };
+  playStep();
+  musicTimer = window.setInterval(playStep, 320);
+}
+
 export function stopMusic() {
   if (musicTimer !== undefined) window.clearInterval(musicTimer);
   musicTimer = undefined;

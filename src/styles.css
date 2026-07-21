@@ -166,6 +166,7 @@ button { font: inherit; }
 .stage-card-row { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2.2vw, 30px); min-height: 0; }
 .stage-card { position: relative; isolation: isolate; width: min(30%, 410px); aspect-ratio: .83; padding: 25px 20px 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; border: 3px solid rgba(235,244,255,.78); border-radius: 22px; color: white; background: #102a58 center/cover no-repeat; box-shadow: 0 15px 35px rgba(1,8,32,.42); text-align: left; cursor: pointer; transition: transform .18s, border-color .18s, filter .18s; }
 .stage-card::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 28%, rgba(4,13,37,.96) 82%); }
+.stage-card.power-unlocked::after { content:'⚡ 精霊の力 解放';position:absolute;z-index:3;top:14px;right:14px;padding:6px 10px;border:1px solid #9defff;border-radius:999px;color:#dffcff;background:rgba(9,37,83,.82);box-shadow:0 0 16px #54dfff;font-size:10px;font-weight:950;letter-spacing:.06em; }
 .stage-card.selected { transform: translateY(-8px) scale(1.035); border-color: #ffd95a; box-shadow: 0 0 0 3px rgba(255,217,90,.22), 0 0 35px rgba(255,181,52,.65), 0 20px 42px rgba(1,8,32,.5); }
 .stage-card.locked { filter: saturate(.35) brightness(.58); }
 .stage-card:focus-visible { outline: 4px solid #59efff; outline-offset: 5px; }
@@ -175,6 +176,7 @@ button { font: inherit; }
 .stage-record span { padding: 8px 6px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: rgba(5,21,51,.7); text-align: center; }
 .stage-record small { display: block; color: #a8ddff; font-size: 8px; }
 .stage-record b { font-size: 12px; }.stage-record.empty { padding: 12px; border-radius: 9px; background: rgba(5,21,51,.7); text-align: center; font-size: 12px; }
+.stage-record-extra { grid-column: 1 / -1; }
 .stage-lock { display: grid; place-items: center; min-height: 54px; border-radius: 9px; background: rgba(2,8,25,.76); font-size: 11px; }.stage-lock b { color: #ffd95a; font-size: 19px; }
 .stage-select-help { display: flex; justify-content: center; gap: 28px; font-size: 12px; text-shadow: 0 2px 7px #061233; }.stage-select-help b { color: #ffe370; }
 
@@ -195,6 +197,23 @@ button { font: inherit; }
 .stage2-result h2 { text-shadow: 0 5px 0 #713649; }.sunset-gem { margin: -18px 0 6px; color: #ffd253; font-size: 70px; filter: drop-shadow(0 0 20px #ff9b49); }.stage2-result .result-stats span { background: rgba(36,18,69,.72); border-color: #dfbd60; }
 .result-button { justify-self: center; min-width: 210px; padding: 13px 25px; border: 3px solid white; border-radius: 999px; color: #4c2858; background: linear-gradient(#fff38a,#e9b33a); box-shadow: 0 6px 0 #87502d; font-weight: 950; cursor: pointer; }
 
+.stage3-shell { background: #090d1b url('/assets/stage3/storm-castle-bg.png') center/cover no-repeat; }
+.stage3-tint { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg,rgba(15,62,145,.12),transparent 45%,rgba(103,49,145,.13)); transition: background 1.4s; }
+.stage3-shell .hud-stage { min-width: 260px; border-inline: 1px solid rgba(111,224,255,.28); background: linear-gradient(90deg,transparent,rgba(5,12,34,.86),transparent); }
+.stage3-shell .hud-stage span { color:#7beeff; }.stage3-shell .hud-stage small { color:#bfd3ff;font-size:9px;font-weight:850;letter-spacing:.12em; }
+.stage3-shell .keyboard-help span,.stage3-shell .music-button,.stage3-shell .game-message { background:rgba(5,10,29,.82);border-color:rgba(117,219,255,.72); }
+.crystal-count { color:#84e9ff; }.crystal-direction-hint { position:absolute;z-index:2;inset:0;pointer-events:none;box-shadow:inset 0 0 calc(12px + var(--crystal-hint,0) * 45px) rgba(56,218,255,var(--crystal-hint,0));transition:box-shadow .2s; }
+.spirit-counter { position:absolute;z-index:5;top:74px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:7px 14px;border:2px solid rgba(124,231,255,.75);border-radius:10px;background:rgba(4,12,35,.8);box-shadow:0 0 18px rgba(57,173,255,.25);font-size:12px; }
+.spirit-counter>span { color:#70ecff;font-size:20px;filter:drop-shadow(0 0 7px #42cfff); }.spirit-counter b{letter-spacing:.08em}.spirit-counter i{display:flex;gap:4px}.spirit-counter em{display:block;width:10px;height:10px;border:1px solid #80ddff;border-radius:50%;background:rgba(255,255,255,.1)}.spirit-counter em.saved{background:#62ebff;box-shadow:0 0 8px #36cfff}
+.is-lightning-warning .game-canvas { animation: lightning-tremor .15s linear infinite; }
+@keyframes lightning-tremor { 30%{transform:translate(1px,-1px)}70%{transform:translate(-1px,1px)} }
+.lightning-warning { position:absolute;z-index:7;top:116px;left:50%;transform:translateX(-50%);padding:9px 22px;border:2px solid #d5f8ff;border-radius:9px;color:#eafeff;background:rgba(16,50,100,.88);box-shadow:0 0 24px #58d9ff;font-size:14px;font-weight:950;animation:warning-pulse .42s alternate infinite; }
+.nox-hud { top:130px; }.nox-hud div { border-color:#aa74ff;background:rgba(7,5,22,.9); }.nox-hud i.alive { background:linear-gradient(90deg,#7441de,#d99aff);box-shadow:0 0 12px #9c58ff; }.nox-hud span { color:#e9dcff; }
+.stage3-shell .lightning-warning { top:180px; }
+.stage3-result { background:radial-gradient(circle at 50% 33%,rgba(115,222,255,.4),rgba(5,13,42,.88) 68%),url('/assets/stage3/storm-castle-bg.png') center/cover; }
+.stage3-result h2 { margin-bottom:5px;text-shadow:0 5px 0 #173a78; }.storm-power { margin:-5px 0 5px;color:#8af1ff;font-size:68px;filter:drop-shadow(0 0 24px #4ea5ff); }.stage3-result .result-stats span{min-width:120px;background:rgba(5,17,52,.76);border-color:#6edfff}.dash-unlocked{margin:16px auto;padding:10px 18px;border-radius:8px;color:#e7fbff;background:rgba(30,94,151,.75);font-size:13px;font-weight:900}.stage3-result .result-button{color:#112754;background:linear-gradient(#c7f8ff,#66d9ff);box-shadow:0 6px 0 #2459a0}
+.is-storm-cleared .stage3-tint { background:rgba(132,211,255,.16); }
+
 @media (pointer: coarse), (max-width: 760px) {
   .keyboard-help { display: none; }
   .mobile-controls { display: flex; }
@@ -209,6 +228,7 @@ button { font: inherit; }
   .stage-select-screen { padding: 14px; gap: 10px; }
   .stage-card-row { justify-content: flex-start; overflow-x: auto; padding: 10px 5vw 18px; scroll-snap-type: x mandatory; }
   .stage-card { flex: 0 0 72vw; max-height: 65vh; scroll-snap-align: center; }
+  .spirit-counter { top:58px; }.stage3-shell .hud-stage{min-width:150px}.stage3-result .result-stats{display:grid;grid-template-columns:1fr 1fr}.stage3-result .result-stats span{min-width:105px}
 }
 
 @media (max-width: 700px) and (orientation: portrait) {
